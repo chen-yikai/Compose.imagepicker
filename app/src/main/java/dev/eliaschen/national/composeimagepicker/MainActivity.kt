@@ -52,7 +52,8 @@ class MainActivity : ComponentActivity() {
 fun PhotoChooserScreen() {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
-    val photoFile = File(context.filesDir, "photo_${System.currentTimeMillis()}.jpg")
+    val photoFile =
+        File(context.getExternalFilesDir("camera_photo"), "photo_${System.currentTimeMillis()}.jpg")
     val photoUri = FileProvider.getUriForFile(
         context,
         "${context.packageName}.provider",
