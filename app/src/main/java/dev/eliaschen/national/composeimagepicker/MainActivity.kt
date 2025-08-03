@@ -14,13 +14,17 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -53,7 +57,7 @@ fun PhotoChooserScreen() {
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val context = LocalContext.current
     val photoFile =
-        File(context.getExternalFilesDir("camera_photo"), "photo_${System.currentTimeMillis()}.jpg")
+        File(context.getExternalFilesDir(null), "photo_${System.currentTimeMillis()}.jpg")
     val photoUri = FileProvider.getUriForFile(
         context,
         "${context.packageName}.provider",
@@ -107,46 +111,47 @@ fun PhotoChooserScreen() {
     ) {
         Text(
             text = "Photo Chooser Demo",
-            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
-        Button(
-            onClick = {
-                pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            },
-            modifier = Modifier.padding(bottom = 8.dp)
-        ) {
-            Text("Pick Image from Gallery")
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Button(
+                onClick = {
+                    pickImageLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                },
+            ) {
+                Text("Gallery")
+            }
+
+            Button(
+                onClick = {
+                    takePhotoLauncher.launch(photoUri)
+                },
+            ) {
+                Text("Camera")
+            }
+
+            Button(onClick = {
+                chooserLauncher.launch(chooserIntent)
+            }) {
+                Text("Image chooser")
+            }
         }
 
-        Button(
-            onClick = {
-                takePhotoLauncher.launch(photoUri)
-            },
-            modifier = Modifier.padding(bottom = 16.dp)
-        ) {
-            Text("Take Photo with Camera")
-        }
-
-        Button(onClick = {
-            chooserLauncher.launch(chooserIntent)
-        }) {
-            Text("Select Image")
-        }
-
+        Spacer(Modifier.height(20.dp))
         selectedImageUri?.let { uri ->
-            Text(
-                text = "Selected Image:",
-                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
             ContentImage(uri)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "URI: $uri",
-                style = androidx.compose.material3.MaterialTheme.typography.bodySmall
-            )
+
+            Card(modifier = Modifier.padding(10.dp)) {
+                Column(modifier = Modifier.padding(10.dp)) {
+                    Text(
+                        text = "$uri",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     }
 }
@@ -163,6 +168,8 @@ fun ContentImage(uri: Uri) {
         }
     }
     bitmap?.let {
-        Image(bitmap = it.asImageBitmap(), contentDescription = null)
+        Image(
+            bitmap = it.asImageBitmap(), contentDescription = null
+        )
     }
 }
